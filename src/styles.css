@@ -1,0 +1,1287 @@
+:root {
+  font-family: Inter, "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  color: #16345a;
+  background: transparent;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+  --glass-bg-a: rgba(245, 252, 255, 0.07);
+  --glass-bg-b: rgba(214, 243, 250, 0.025);
+  --glass-tint: rgba(63, 185, 211, 0.045);
+  --glass-border: rgba(255, 255, 255, 0.52);
+  --glass-rim: rgba(255, 255, 255, 0.76);
+  --glass-inner: rgba(255, 255, 255, 0.34);
+  --glass-shadow: rgba(17, 72, 100, 0.045);
+  --glass-blur: 8px;
+  --glass-saturate: 1.08;
+  --panel-radius: 32px;
+  --accent: #32cdb0;
+  --accent-end: #84d66d;
+  --accent-luminous: #a9fae7;
+  --accent-core: #f2fffb;
+  --accent-soft: rgba(50, 205, 176, 0.22);
+  --text-strong: #13365e;
+  --text-muted: rgba(31, 72, 113, 0.74);
+  --line: rgba(255, 255, 255, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  background: transparent;
+}
+
+body {
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+}
+
+.app-shell.preview-shell {
+  width: 360px;
+  height: 300px;
+}
+
+.floating-surface { position: relative; width: 100%; height: 100%; }
+.floating-surface.is-transitioning { opacity: 0; }
+.floating-surface.is-collapsed {
+  display: grid;
+  place-items: center;
+}
+.floating-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #f6fcff;
+  font-size: 20px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: grab;
+  isolation: isolate;
+  overflow: visible;
+  touch-action: manipulation;
+  transition: transform 140ms ease;
+}
+.orb-optics {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.floating-orb:hover { transform: scale(1.02); }
+.floating-orb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.orb-progress-bloom,
+.orb-progress-segment,
+.orb-progress-core { transition: opacity 180ms ease; }
+.orb-value {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+  color: #f6fcff;
+  letter-spacing: -0.045em;
+  -webkit-text-stroke: 0.5px rgba(15, 35, 49, 0.48);
+  paint-order: stroke fill;
+  text-shadow: 0 0.5px 0.7px rgba(15, 35, 49, 0.72),
+    0 0 1.2px rgba(15, 35, 49, 0.48);
+  pointer-events: none;
+}
+.floating-hint { position: absolute; right: 48px; bottom: 4px; font-size: 8px; color: var(--text-muted); pointer-events: none; }
+.pin-button { padding: 0; cursor: pointer; }
+.pin-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.glass {
+  /* Clear center, restrained cool lower edge; never filter the content itself. */
+  background:
+    linear-gradient(180deg, transparent 55%, var(--glass-tint) 100%),
+    linear-gradient(180deg, var(--glass-bg-a), transparent 38%, transparent 65%, var(--glass-bg-b));
+  background-clip: padding-box;
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-rim);
+  box-shadow:
+    inset 0 1px 0 var(--glass-inner),
+    inset 0 3px 5px -3px rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(127, 220, 236, 0.20),
+    inset 0 -6px 12px -10px var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-orb,
+  .orb-progress-core,
+  .orb-progress-bloom,
+  .orb-progress-segment { transition: none; }
+}
+
+.quota-panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 17px 18px 14px;
+  overflow: hidden;
+  border-radius: var(--panel-radius);
+  isolation: isolate;
+}
+
+.quota-panel.single-quota {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.quota-panel::before {
+  position: absolute;
+  z-index: -1;
+  inset: 1px;
+  border-radius: calc(var(--panel-radius) - 1px);
+  background:
+    radial-gradient(ellipse 70% 10% at 50% 0%, rgba(255, 255, 255, 0.08), transparent 75%);
+  content: "";
+  pointer-events: none;
+}
+
+.tone-warning {
+  --accent: #e9a442;
+  --accent-end: #f3c96c;
+  --accent-luminous: #ffe59a;
+  --accent-core: #fff8dd;
+  --accent-soft: rgba(233, 164, 66, 0.2);
+}
+
+.tone-critical {
+  --accent: #e76567;
+  --accent-end: #f19776;
+  --accent-luminous: #ffb69d;
+  --accent-core: #fff1e9;
+  --accent-soft: rgba(231, 101, 103, 0.2);
+}
+
+.tone-neutral {
+  --accent: #70a7c9;
+  --accent-end: #9bc6dc;
+  --accent-luminous: #c5edfa;
+  --accent-core: #f1fbff;
+  --accent-soft: rgba(112, 167, 201, 0.18);
+}
+
+.panel-header,
+.identity,
+.panel-utilities,
+.quota-meta,
+.secondary-quota,
+.panel-footer,
+.footer-status {
+  display: flex;
+  align-items: center;
+}
+
+.panel-header {
+  min-width: 0;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.identity {
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 9px;
+}
+
+.identity h1 {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.075em;
+  line-height: 1;
+}
+
+.activity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-copy {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 10px var(--accent);
+}
+
+.panel-utilities {
+  flex: 0 0 auto;
+  gap: 5px;
+}
+
+.language-chip,
+.utility-icon {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(24, 64, 102, 0.7);
+}
+
+.language-chip {
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.utility-icon svg,
+.refresh-button svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.utility-icon.is-active {
+  color: var(--accent);
+}
+
+.primary-quota {
+  display: grid;
+  align-content: center;
+  min-height: 0;
+}
+
+.primary-heading {
+  display: flex;
+  min-height: 16px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.restriction-badge {
+  padding: 2px 6px;
+  border: 1px solid rgba(231, 101, 103, 0.25);
+  border-radius: 999px;
+  background: rgba(231, 101, 103, 0.1);
+  color: #a8414b;
+  font-size: 9px;
+}
+
+.primary-value {
+  margin: 2px 0 5px;
+  color: var(--text-strong);
+  font-size: clamp(48px, 15vw, 58px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+}
+
+.progress-rail {
+  position: relative;
+  width: 100%;
+  height: 9px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 3px rgba(20, 80, 130, 0.1);
+}
+
+.progress-fill {
+  display: block;
+  width: var(--quota-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent-end));
+  box-shadow: 0 0 12px var(--accent-soft);
+  transition: width 300ms ease;
+}
+
+.progress-rail.is-unavailable {
+  background: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.2) 0 7px,
+    rgba(255, 255, 255, 0.08) 7px 14px
+  );
+}
+
+.quota-meta {
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 7px;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 590;
+  white-space: nowrap;
+}
+
+.error-copy {
+  display: grid;
+  gap: 2px;
+  margin-top: 7px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.11);
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.error-copy.is-compact {
+  grid-template-columns: auto 1fr;
+  column-gap: 6px;
+}
+
+.primary-quota .error-copy {
+  margin-top: 9px;
+}
+
+.error-copy strong {
+  color: var(--text-strong);
+  font-size: 10px;
+}
+
+.secondary-quota {
+  min-height: 35px;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.secondary-label {
+  font-weight: 620;
+}
+
+.secondary-quota strong {
+  color: var(--text-strong);
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.secondary-reset {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 580;
+}
+
+.panel-footer {
+  min-height: 24px;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.footer-status {
+  min-width: 0;
+  gap: 4px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 590;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reset-mark {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.stale-label {
+  color: #a66824;
+}
+
+.refresh-button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 50%;
+  outline: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 5px 16px rgba(38, 94, 139, 0.14);
+  transform: translateY(-1px);
+}
+
+.refresh-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(34, 113, 168, 0.28);
+}
+
+.refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.is-spinning {
+  animation: spin 750ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill,
+  .refresh-button {
+    transition: none;
+  }
+
+  .is-spinning {
+    animation-duration: 1.5s;
+  }
+}
+
+/* Approved light-glass composition; scoped to the expanded character panel. */
+.character-panel.quota-panel {
+  --panel-radius: 32px;
+  --panel-side: 18px;
+  --metrics-width: 136px;
+  --metric-icon-size: 46px;
+  --metric-gap: 17px;
+  --metric-row-height: 48px;
+  --panel-bottom-anchor: 18px;
+  --refresh-size: 28px;
+  --refresh-bottom: var(--panel-bottom-anchor);
+  --text-strong: #26282d;
+  --text-muted: #4d535d;
+  display: block;
+  padding: 0;
+  color: var(--text-strong);
+  background:
+    radial-gradient(ellipse at 18% 14%, rgba(255, 255, 255, 0.56), transparent 64%),
+    linear-gradient(145deg, rgba(249, 251, 255, 0.84), rgba(238, 243, 251, 0.76));
+  border-color: rgba(246, 250, 255, 0.50);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 0 3px rgba(66, 85, 108, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 3px 12px rgba(34, 45, 65, 0.06);
+  backdrop-filter: blur(22px) saturate(1.08);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+}
+
+/* Only native API acceptance permits the low-tint material. CSS fallback
+   remains readable, but is never reported as desktop Acrylic. */
+:root[data-panel-glass="native-acrylic"] .character-panel.quota-panel {
+  /* Desktop diffusion stays native; these are surface optics, not fake blur. */
+  background:
+    radial-gradient(ellipse 95% 72% at 50% 18%, rgba(255, 255, 255, 0.06), transparent 76%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.10), rgba(235, 243, 250, 0.05) 56%, rgba(232, 241, 249, 0.09));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.character-panel.quota-panel::before {
+  z-index: 0;
+  inset: 1px;
+  border-radius: 31px;
+  background:
+    radial-gradient(ellipse 86% 50% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 80%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 40%, rgba(204, 225, 242, 0.035));
+}
+
+.character-panel-header {
+  position: absolute;
+  z-index: 6;
+  inset: 19px 24px auto 24px;
+  height: 32px;
+  justify-content: flex-end;
+}
+
+.panel-drag-area {
+  position: absolute;
+  inset: 0 182px 0 0;
+}
+
+.character-panel .panel-utilities {
+  position: relative;
+  z-index: 1;
+  gap: 8px;
+}
+
+.character-panel .utility-icon,
+.character-panel .refresh-button {
+  --control-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.64), 0 2px 7px rgba(46, 54, 70, 0.08);
+  border-color: rgba(255, 255, 255, 0.52);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.22));
+  color: var(--text-strong);
+  box-shadow: var(--control-shadow);
+  text-shadow: none;
+}
+
+.character-panel .utility-icon {
+  --control-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.40), 0 2px 5px rgba(37, 49, 66, 0.08);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  appearance: none;
+  display: grid;
+  grid-template-columns: 14px max-content;
+  width: auto;
+  min-width: 78px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 13px;
+  border-radius: 16px;
+  border-color: rgba(255, 255, 255, 0.28);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.42), rgba(235, 242, 249, 0.16));
+  box-shadow: var(--control-shadow);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  /* Desktop is already diffused by the panel. Avoid a second backdrop surface
+     under the animated ancestor so hover and its rim share one paint layer. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  cursor: pointer;
+  background-clip: padding-box;
+  transform: none;
+  transition: background-color 160ms ease;
+}
+
+.character-panel .utility-icon.panel-settings-button {
+  --control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(12, 18, 26, 0.12), 0 2px 5px rgba(36, 40, 47, 0.10);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: linear-gradient(165deg, #303944, #202832);
+  color: #ffffff;
+  box-shadow: var(--control-shadow);
+  background-clip: padding-box;
+}
+
+.character-panel .utility-icon > span {
+  display: block;
+  line-height: 16px;
+  transform: translateY(-0.5px);
+}
+
+.character-panel .utility-icon:focus-visible {
+  outline: 2px solid #5d687b;
+  outline-offset: -4px;
+}
+
+.character-panel .panel-settings-button:focus-visible {
+  outline-color: rgba(255, 255, 255, 0.72);
+}
+
+.character-panel .utility-icon:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.character-panel .utility-icon svg,
+.character-panel .refresh-button svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.character-panel .utility-icon svg {
+  display: block;
+  transform: translateY(-0.5px);
+}
+
+.character-panel .refresh-button svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+.character-stage {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  /* Clip the portrait's intentional bottom overflow without a scroll offset. */
+  overflow: clip;
+  border-radius: inherit;
+}
+
+.character-hero {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 360px;
+  transform: translateX(-50%);
+}
+
+.package-title {
+  position: absolute;
+  z-index: 4;
+  top: 23px;
+  left: 50%;
+  width: max-content;
+  max-width: 250px;
+  margin: 0;
+  transform: translateX(-50%);
+  color: var(--text-strong);
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.character-portrait {
+  position: absolute;
+  z-index: 2;
+  bottom: -26px;
+  left: 50%;
+  height: 91%;
+  aspect-ratio: 1122 / 1402;
+  transform: translateX(-50%);
+  pointer-events: none;
+  /* Preserve the accepted character container and edge mask. */
+  mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent),
+    linear-gradient(to bottom, #000 calc(100% - 32px), transparent calc(100% - 12px));
+  mask-composite: intersect;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent),
+    linear-gradient(to bottom, #000 calc(100% - 32px), transparent calc(100% - 12px));
+  -webkit-mask-composite: source-in;
+}
+
+.cat-body-layer,
+.cat-head-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.cat-body-layer { z-index: 0; }
+.cat-head-stage {
+  z-index: 1;
+  /* One shared alignment for every head; never driven by state or pointer. */
+  inset: -6% auto auto 9%;
+  width: 82%;
+  height: 82%;
+  position: absolute;
+  perspective: 800px;
+  pointer-events: none;
+}
+.cat-head-layer { z-index: 1; transform-origin: 50% 58%; will-change: transform; }
+.cat-head-mesh { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
+.cat-character[data-cat-renderer="mesh-2.5d"] .cat-head-layer { visibility: hidden; }
+.cat-character[data-cat-renderer="mesh-2.5d"] .cat-head-mesh { display: block; }
+.cat-debug { position: absolute; z-index: 10; top: 30px; left: -150px; white-space: pre; font: 10px monospace; background: #fffe; color: #123; }
+.cat-character[data-cat-ready="false"] { visibility: hidden; }
+
+.panel-metrics {
+  position: absolute;
+  z-index: 4;
+  left: var(--panel-side);
+  /* Both visible border-box bottoms share this exact panel-local baseline. */
+  bottom: var(--panel-bottom-anchor);
+  display: grid;
+  width: var(--metrics-width);
+  gap: 22px;
+}
+
+.panel-metric {
+  display: grid;
+  height: var(--metric-row-height);
+  grid-template-columns: var(--metric-icon-size) minmax(0, 1fr);
+  align-items: end;
+  gap: var(--metric-gap);
+}
+
+.metric-icon {
+  display: grid;
+  width: var(--metric-icon-size);
+  height: var(--metric-row-height);
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(232, 241, 249, 0.10));
+  color: #596575;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.58), inset 0 -1px 1px rgba(72, 94, 119, 0.09), 0 2px 8px rgba(66, 83, 108, 0.05);
+}
+
+.metric-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.metric-copy {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 27px 16px;
+  gap: 4px;
+  padding-bottom: 1px;
+}
+
+.metric-copy strong {
+  color: var(--text-strong);
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 27px;
+  white-space: nowrap;
+}
+
+.metric-copy span {
+  color: #131a24;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  /* Glyph-local separation only; no plate or change to the native backdrop. */
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.58), 0 0.5px 0 rgba(255, 255, 255, 0.36);
+}
+
+.character-refresh {
+  position: absolute;
+  z-index: 6;
+  width: var(--refresh-size);
+  height: var(--refresh-size);
+  right: var(--panel-side);
+  bottom: var(--refresh-bottom);
+  isolation: isolate;
+  overflow: hidden;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  background-clip: padding-box;
+}
+
+.character-panel .refresh-button:hover:not(:disabled),
+.character-panel .utility-icon:hover:not(:disabled) {
+  transform: none;
+  box-shadow: var(--control-shadow);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.62), rgba(236, 243, 250, 0.32));
+  background-clip: padding-box;
+}
+
+.character-panel .panel-settings-button:hover:not(:disabled) {
+  background: linear-gradient(165deg, #3b4551, #27313d);
+  background-clip: padding-box;
+}
+
+/* Press feedback changes the surface only: no moving rim, scaling or new halo. */
+.character-panel .utility-icon:active:not(:disabled),
+.character-panel .refresh-button:active:not(:disabled) {
+  transform: none;
+  box-shadow: var(--control-shadow);
+  background: linear-gradient(165deg, rgba(235, 242, 249, 0.46), rgba(255, 255, 255, 0.28));
+  background-clip: padding-box;
+}
+
+.character-panel .panel-settings-button:active:not(:disabled) {
+  background: linear-gradient(165deg, #252e39, #1d252f);
+  background-clip: padding-box;
+}
+
+/* Reference video 0–4s: the surface and portrait stay anchored, while content
+   resolves in sequence. Count-up is an opening-only text effect in MetricValue.
+   Individual translate/scale do not replace the title's centering transform. */
+@keyframes panel-content-resolve {
+  from { opacity: 0; filter: blur(4px); translate: 0 7px; scale: 0.985; }
+  to { opacity: 1; filter: blur(0); translate: 0 0; scale: 1; }
+}
+
+@keyframes panel-glass-resolve {
+  from { opacity: 0; scale: 0.985; }
+  to { opacity: 1; scale: 1; }
+}
+
+.character-panel.quota-panel::before {
+  animation: panel-glass-resolve 640ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.character-panel .package-title,
+.character-panel .panel-utilities,
+.character-panel .panel-metric,
+.character-panel .character-refresh {
+  animation: panel-content-resolve 720ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.character-panel .package-title { animation-delay: 60ms; }
+.character-panel .panel-utilities { animation-delay: 100ms; }
+.character-panel .metric-quota { animation-delay: 140ms; }
+.character-panel .metric-reset { animation-delay: 220ms; }
+.character-panel .metric-time { animation-delay: 300ms; }
+.character-panel .character-refresh { animation-delay: 340ms; }
+
+/* Explicit user opt-in: play this finite opening sequence even when Windows
+   disables client-area animation. Other reduced-motion rules remain intact. */
+
+/* Refresh-only interaction layer. All layout/rim dimensions remain above. */
+.character-panel .character-refresh.refresh-action {
+  overflow: visible;
+  transition: background 280ms cubic-bezier(.22,.8,.3,1),
+    box-shadow 280ms cubic-bezier(.22,.8,.3,1), transform 120ms cubic-bezier(.22,.8,.3,1);
+}
+
+.character-panel .refresh-action:hover:not(:disabled) {
+  transform: none;
+  background: linear-gradient(160deg, rgba(255,255,255,.70), rgba(234,249,253,.32));
+  box-shadow: inset 0 0 0 1px rgba(231,252,255,.42), var(--control-shadow);
+}
+
+.character-panel .refresh-action[aria-disabled="false"]:active {
+  transform: scale(.97);
+}
+
+.character-panel .refresh-action[aria-disabled="true"] { cursor: wait; }
+
+.character-panel .refresh-action:focus-visible {
+  outline: 1px solid rgba(52,119,152,.8);
+  outline-offset: -4px;
+}
+
+.refresh-icon-clip {
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  overflow: hidden;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.refresh-icon-enter, .refresh-icon-rotor { display: grid; place-items: center; }
+
+.refresh-action[data-animating="true"] .refresh-icon-rotor {
+  animation: refresh-turn 720ms linear infinite;
+}
+
+.refresh-action[data-result="success"] .refresh-icon-rotor {
+  animation: refresh-settle 160ms cubic-bezier(.22,.8,.3,1);
+}
+
+.refresh-action::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.refresh-action[data-result="error"]::after { animation: refresh-error-edge 200ms ease-out; }
+
+.refresh-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  padding: 6px 9px;
+  border: 1px solid rgba(237,249,255,.18);
+  border-radius: 7px;
+  color: #f6fbff;
+  background: rgba(39,49,62,.88);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 3px 9px rgba(25,35,49,.15);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 180ms cubic-bezier(.22,.8,.3,1),
+    transform 180ms cubic-bezier(.22,.8,.3,1), visibility 180ms;
+}
+
+.refresh-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 8px;
+  width: 8px;
+  height: 4px;
+  background: rgba(39,49,62,.88);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.refresh-action:is(:hover, :focus-visible)[data-tooltip-dismissed="false"] .refresh-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.refresh-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes refresh-turn { to { transform: rotate(360deg); } }
+@keyframes refresh-settle { 50% { transform: scale(1.08); } }
+@keyframes refresh-error-edge { 30% { box-shadow: inset 0 0 0 1px rgba(204,113,103,.65); } }
+
+.refresh-action[data-reduced-motion="true"] .refresh-icon-enter,
+.refresh-action[data-reduced-motion="true"] .refresh-icon-rotor,
+.refresh-action[data-reduced-motion="true"]::after { animation: none; }
+.refresh-action[data-reduced-motion="true"][data-refreshing="true"] .refresh-icon-rotor { opacity: .55; }
+.character-panel .refresh-action[data-reduced-motion="true"],
+.refresh-action[data-reduced-motion="true"] .refresh-tooltip { transition: none; }
+.character-panel .refresh-action[data-reduced-motion="true"]:active { transform: none; }
+.refresh-action[data-reduced-motion="true"] .refresh-tooltip { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .character-panel .utility-icon { transition: none; }
+}
+
+/* Top-right controls: text and icon motion stay inside the locked glass
+   geometry. The app switch overrides the Windows preference. */
+.character-panel .glass-action {
+  transition: background 180ms cubic-bezier(.22,.8,.3,1),
+    box-shadow 180ms cubic-bezier(.22,.8,.3,1),
+    transform 120ms cubic-bezier(.22,.8,.3,1);
+}
+
+.character-panel .glass-action:hover:not(:disabled) {
+  transform: none;
+}
+
+.character-panel .glass-action:active:not(:disabled) {
+  transform: scale(.98);
+}
+
+.character-panel .glass-action > .action-icon {
+  transform: none;
+}
+
+.character-panel .action-icon {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  transition: transform 200ms cubic-bezier(.22,.8,.3,1);
+}
+
+.character-panel .action-labels {
+  position: relative;
+  z-index: 3;
+  display: block;
+  height: 16px;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.character-panel .action-labels > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  line-height: 16px;
+  transition: transform 220ms cubic-bezier(.22,.8,.3,1), opacity 160ms ease;
+}
+
+.character-panel .label-normal { transform: translateY(0); opacity: 1; }
+.character-panel .label-hover {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 42px;
+  margin-left: -18px;
+  color: inherit;
+  font-size: 10.5px;
+  letter-spacing: -.45px;
+  transform: translateY(140%);
+  opacity: 0;
+}
+
+.character-panel .glass-action:hover:not(:disabled) .label-normal { transform: translateY(-140%); opacity: 0; }
+.character-panel .glass-action:hover:not(:disabled) .label-hover { transform: translateY(0); opacity: 1; }
+.character-panel .pin-action:hover:not(:disabled) .action-icon { transform: translateX(-6px) rotate(-6deg); }
+.character-panel .pin-action.is-active:hover:not(:disabled) .action-icon { transform: translateX(-3px) rotate(6deg); }
+.character-panel .settings-action:hover:not(:disabled) .action-icon { transform: translateX(-6px) rotate(15deg); }
+.character-panel .settings-action:active:not(:disabled) .action-icon { transform: translateX(-6px) rotate(35deg); }
+
+.character-panel .pin-action.is-active {
+  background: linear-gradient(165deg, rgba(240, 252, 255, .48), rgba(222, 242, 249, .18));
+}
+
+.character-panel .pin-action:hover:not(:disabled) {
+  background: linear-gradient(165deg, rgba(255, 255, 255, .62), rgba(232, 247, 252, .27));
+}
+
+.character-panel .settings-action:hover:not(:disabled) {
+  background: linear-gradient(165deg, #3b4652, #27323e);
+}
+
+.character-panel .glass-action[data-reduced-motion="true"] {
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+.character-panel .glass-action[data-reduced-motion="true"]:active:not(:disabled),
+.character-panel .glass-action[data-reduced-motion="true"]:hover:not(:disabled),
+.character-panel .glass-action[data-reduced-motion="true"] .action-icon,
+.character-panel .glass-action[data-reduced-motion="true"] .label-normal,
+.character-panel .glass-action[data-reduced-motion="true"] .label-hover {
+  transform: none;
+  transition: none;
+}
+
+.character-panel .glass-action[data-reduced-motion="true"] .label-normal { opacity: 1; }
+.character-panel .glass-action[data-reduced-motion="true"] .label-hover {
+  opacity: 0;
+  transition: none;
+}
+
+.character-panel .glass-action[data-reduced-motion="true"]:hover:not(:disabled) .action-icon,
+.character-panel .glass-action[data-reduced-motion="true"]:active:not(:disabled) .action-icon,
+.character-panel .glass-action[data-reduced-motion="true"]:hover:not(:disabled) .label-normal,
+.character-panel .glass-action[data-reduced-motion="true"]:hover:not(:disabled) .label-hover {
+  transform: none;
+}
+
+.character-panel .glass-action[data-reduced-motion="true"]:hover:not(:disabled) .label-normal {
+  opacity: 1;
+}
+
+.character-panel .glass-action[data-reduced-motion="true"]:hover:not(:disabled) .label-hover {
+  opacity: 0;
+  transition: none;
+}
+
+/* Scoped neon interaction layer for the top pin and settings controls only.
+   The shared selector intentionally outranks the older utility/settings rules
+   so the settings button cannot retain its legacy dark gradient. */
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action) {
+  border: 1px solid rgba(60, 72, 88, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(31, 41, 55, 0.72);
+  text-shadow: none;
+  box-shadow: none;
+  transition:
+    color 0.5s ease,
+    background-color 0.5s ease,
+    border-color 0.5s ease,
+    box-shadow 0.5s ease,
+    text-shadow 0.5s ease,
+    transform 0.18s ease;
+}
+
+.character-panel .utility-icon.glass-action.pin-action.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(31, 41, 55, 0.72);
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):hover:not(:disabled),
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):focus-visible {
+  color: #ffffff;
+  background: #008cff;
+  border-color: #008cff;
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 0.95),
+    0 0 8px rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 0 5px rgba(0, 140, 255, 0.95),
+    0 0 14px rgba(0, 140, 255, 0.75),
+    0 0 28px rgba(0, 140, 255, 0.45);
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: -4px;
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):hover:not(:disabled) .action-icon,
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):focus-visible .action-icon,
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):active:not(:disabled) .action-icon {
+  transform: none;
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):hover:not(:disabled) .action-icon svg,
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):focus-visible .action-icon svg {
+  color: #ffffff;
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.9));
+}
+
+/* Keep the existing label visible; remove the old hover copy swap. */
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action) .label-hover {
+  display: none;
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action) .label-normal,
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):hover:not(:disabled) .label-normal {
+  transform: none;
+  opacity: 1;
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action):active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(60, 72, 88, 0.22);
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action)[data-reduced-motion="true"] {
+  transition: none;
+}
+
+.character-panel .utility-icon.glass-action:is(.pin-action, .settings-action)[data-reduced-motion="true"]:active:not(:disabled) {
+  transform: none;
+}
+
+/* Refresh-only mechanical interaction layer. Keep the existing 28px circular
+   geometry, but give the button a blue raised base that collapses on press. */
+.character-panel .refresh-button.character-refresh.refresh-action {
+  border: 1px solid #cbd3dc;
+  border-radius: 50%;
+  background: #f3f6f9;
+  color: #52606d;
+  transform: translateY(0);
+  box-shadow:
+    inset 0 18px 18px -15px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65),
+    0 3px 0 #aeb8c3,
+    0 4px 5px rgba(60, 72, 88, 0.14),
+    0 7px 12px rgba(60, 72, 88, 0.08);
+  transition:
+    transform 150ms ease-in-out,
+    box-shadow 150ms ease-in-out,
+    background-color 150ms ease-in-out,
+    border-color 150ms ease-in-out;
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action:hover:not(:disabled) {
+  transform: translateY(0);
+  background: #ffffff;
+  border-color: #b9c4cf;
+  color: #344250;
+  box-shadow:
+    inset 0 18px 18px -15px rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+    0 3px 0 #a7b2bd,
+    0 4px 6px rgba(60, 72, 88, 0.16),
+    0 8px 14px rgba(60, 72, 88, 0.1);
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action[aria-disabled="false"]:active {
+  transform: translateY(3px);
+  background: #edf1f5;
+  border-color: #cbd3dc;
+  color: #52606d;
+  box-shadow:
+    inset 0 3px 7px rgba(55, 65, 75, 0.13),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65),
+    0 0 0 #aeb8c3,
+    0 1px 2px rgba(55, 65, 75, 0.08);
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action:focus-visible {
+  outline: 2px solid rgba(82, 96, 109, 0.45);
+  outline-offset: 3px;
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action svg {
+  color: #52606d;
+  stroke: currentColor;
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action:hover:not(:disabled) svg {
+  color: #344250;
+  stroke: currentColor;
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action[data-reduced-motion="true"] {
+  transition: none;
+}
+
+.character-panel .refresh-button.character-refresh.refresh-action[data-reduced-motion="true"][aria-disabled="false"]:active {
+  transform: translateY(0);
+}

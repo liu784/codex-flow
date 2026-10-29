@@ -1,0 +1,29 @@
+# Build products and dependencies
+node_modules/
+dist/
+target/
+src-tauri/target/
+src-tauri/gen/
+*.log
+*.tsbuildinfo
+
+# User data, local configuration and historical evidence must stay private
+.env
+.env.*
+!.env.example
+.codex/
+.agents/
+artifacts/
+reports/
+approvals/
+历史资料/
+运行程序/
+*.lnk
+settings.json
+island-avatar.txt
+island-position.json
+island-notifications.json
+hooks.json
+*.backup
+.DS_Store
+Thumbs.db

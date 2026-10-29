@@ -1,0 +1,8 @@
+/* Only explicit preference overrides. Default panel visual CSS is unchanged. */
+.flow-opening-off .character-panel,
+.flow-opening-off .character-panel .package-title,
+.flow-opening-off .character-panel .panel-utilities,
+.flow-opening-off .character-panel .panel-metric,
+.flow-opening-off .character-panel .character-refresh {
+  animation: none !important;
+}

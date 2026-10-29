@@ -1,0 +1,6 @@
+{
+  "rateLimits": {
+    "limitId": "other",
+    "primary": {"usedPercent": 40, "windowDurationMins": 1440, "resetsAt": 1800000000}
+  }
+}

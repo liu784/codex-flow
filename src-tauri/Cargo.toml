@@ -1,0 +1,64 @@
+[package]
+name = "codex-flow"
+version = "0.1.0"
+license = "MIT"
+description = "Local Codex quota monitor"
+authors = ["Codex Flow"]
+edition = "2021"
+default-run = "codex-flow"
+
+[features]
+default = ["native-orb-refraction", "tauri/custom-protocol"]
+diagnostic-telemetry = []
+gate4-acceptance = []
+native-orb-refraction = []
+
+[lib]
+name = "codex_flow_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "codex-flow"
+path = "src/main.rs"
+
+[[bin]]
+name = "gate0_probe"
+path = "src/bin/gate0_probe.rs"
+required-features = ["diagnostic-telemetry"]
+
+[[bin]]
+name = "gate1_probe"
+path = "src/bin/gate1_probe.rs"
+required-features = ["diagnostic-telemetry"]
+
+[[bin]]
+name = "app_server_diagnostic"
+path = "src/bin/app_server_diagnostic.rs"
+required-features = ["diagnostic-telemetry"]
+
+[build-dependencies]
+cc = "1"
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+anyhow = "1"
+flate2 = "1"
+quick-xml = "0.42"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-autostart = "2.5.1"
+tauri-plugin-single-instance = "2.4.4"
+thiserror = "2"
+tokio = { version = "1", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"] }
+
+[dev-dependencies]
+base64 = "0.22"
+dom_query = { version = "0.27.0", default-features = false }
+http = "1"
+sha2 = "0.11"
+
+[patch.crates-io]
+# Temporary upstream dependency fixes; see ../vendor/README.md.
+tauri-codegen = { path = "../vendor/tauri-codegen" }
+wry = { path = "../vendor/wry" }

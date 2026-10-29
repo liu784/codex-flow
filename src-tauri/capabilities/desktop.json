@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop",
+  "description": "Settings and quota reminder local events and self-close only.",
+  "windows": ["settings", "tray-popup", "quota-alert"],
+  "permissions": ["core:event:default", "core:window:allow-close"]
+}

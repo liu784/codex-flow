@@ -1,0 +1,47 @@
+/* DEV-only. Library optical layer cannot filter or transform the quota content. */
+.glass-prototype { width: 100%; height: 100%; background: transparent; }
+.gate3-material-badge {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 100;
+  pointer-events: none;
+  padding: 0 2px;
+  border-radius: 2px;
+  background: #fff;
+  color: #13365e;
+  font: 700 9px/10px "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+.prototype-standard .quota-panel,
+.prototype-standard .floating-orb {
+  isolation: isolate;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.prototype-standard .quota-panel::before { background: none; }
+.liquid-optics {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  clip-path: inset(0 round var(--panel-radius));
+}
+.floating-orb .liquid-optics { clip-path: circle(50%); }
+.liquid-optics .glass {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: linear-gradient(135deg, rgba(235,247,255,.10), rgba(214,235,255,.035));
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.liquid-optics .pointer-events-none { pointer-events: none; }
+.liquid-optics .opacity-0 { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .liquid-optics * { transition: none !important; }
+}
